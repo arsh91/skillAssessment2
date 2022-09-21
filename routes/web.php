@@ -16,7 +16,9 @@ use App\Http\Controllers\LoginController;
 */
 
 
-
+Route::get('{any}', function () {
+    return view('login');
+})->where('any', '.*');
 Auth::routes();
 Route::get('/',[LoginController::class, 'getLogin'])->name('usersLogin');
 Route::post('/login', [LoginController::class, 'postLogin'])->name('usersLoginPost');

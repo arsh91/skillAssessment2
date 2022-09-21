@@ -1,67 +1,76 @@
 <template>
+<main>
       <nav class="nav">
         <div class="row nav-inner">
             <div class="col-md-2">
             <span>🌊 kanye.rest</span>
             </div>
-            <div class="col-md-10 favorites">
-            <span>favorites</span>
-
+            <div class="col-md-8 favorites">
+            <router-link to="/home" class="FavLink">Home</router-link>
+            <router-link to="/favourite" class="FavLink ml-6" style="margin-left: 30px;">favorites</router-link>
             </div>
-
+            <div v-for="(u, index) in user" :key="index" class="col-md-1 favorites" style="padding-left:70px;">
+               {{u.name}}
+            </div> 
+             <div class="col-md-1 favorites">
+                <a to="/logout" class="FavLink ml-6" style="margin-left: 30px;" @click.prevent="logout()">Logout</a>
+            </div> 
         </div>
     </nav>
-
+<router-view></router-view>
     <div class="main-container dragscroll" id="js-parallax-container">
       <h1 class="nav-inner text-center">Kanye West quotes </h1>
-        
-      <div style="text-align:center;color:#f3ffb3;font-size: 2.5em;"><i class="fa fa-refresh" aria-hidden="true" title="Refresh"></i></div>
+         <div v-if="successAlert" class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-left: 280px;max-width: 837px;">
+            <strong>Added to favorites successfully!</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+         <div v-if="successAlertAlready" class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-left: 280px;max-width: 837px;">
+            <strong>Already added to favorites!</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      <div style="text-align:center;color:#f3ffb3;font-size: 2.5em;"><i class="fa fa-refresh" aria-hidden="true" title="Refresh" @click="getQuotes"></i></div>
         <div class="scrollable-area" id="js-dragscroll-area">
                 <div class="slide one">
                     <div class="masonry">
-                        <div class="item">
+                        <div class="item" v-for="(quote, index) in quotes" :key="index">
                             <div class="qouteText">
-                                "If you have the opportunity to play this game of life you need to appreciate every moment. a lot of people don't appreciate the moment until it's passed."<br>
-                                <i class="fa fa-trash fa-3 mr-3 mt-2" style="color:#f3ffb3;font-size: 1.5em;" title="Delete from favourites"></i>
-                                <i class="fa fa-star fa-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites"></i>
+                                {{quote}}<br>
+                                <i class="fa fa-star fa-3 mt-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites" @click="AddToFavourite(quote)"></i>
                             </div>
-                        </div>
-                        <div class="item">
-                            <div class="qouteText">"I love sleep; it's my favorite."
-                                <br>
-                                <i class="fa fa-trash fa-3 mr-3 mt-2" style="color:#f3ffb3;font-size: 1.5em;" title="Delete from favourites"></i>
-                                <i class="fa fa-star fa-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites"></i>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="qouteText">"If you have the opportunity to play this game of life you need to appreciate every moment. a lot of people don't appreciate the moment until it's passed."
-                                <br>
-                                <i class="fa fa-trash fa-3 mr-3 mt-2" style="color:#f3ffb3;font-size: 1.5em;" title="Delete from favourites"></i>
-                                <i class="fa fa-star fa-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites"></i>
-                            </div>
-                        </div>
-                        <div class="item">
-                             <div class="qouteText">"I love sleep; it's my favorite."
-                                <br>
-                                <i class="fa fa-trash fa-3 mr-3 mt-2" style="color:#f3ffb3;font-size: 1.5em;" title="Delete from favourites"></i>
-                                <i class="fa fa-star fa-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites"></i>
-                             </div>
-                        </div>
-                        <div class="item">
-                            <div class="qouteText"
-                            >"If you have the opportunity to play this game of life you need to appreciate every moment. a lot of people don't appreciate the moment until it's passed."
-                            <br>
-                                <i class="fa fa-trash fa-3 mr-3 mt-2" style="color:#f3ffb3;font-size: 1.5em;" title="Delete from favourites"></i>
-                                <i class="fa fa-star fa-3" style="color:#f3ffb3;font-size: 1.5em;" title="Add to favourites"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+</main>
 </template>
 <script>
+import { useRouter } from 'vue-router';
+import { mapActions } from 'vuex';
 export default {
+    name: "Home",
+    data() {
+        return {
+            user:this.$store.state.auth.user.User,
+            router:useRouter(),
+            successAlert:false,
+            successAlertAlready:false,
+            quotes: [],
+            favourites:[],
+            moreQuotesFetched:false,
+            moreQuotes: []
+        };
+    },
  	mounted() {
+
+        // API call
+        this.getQuotes();
+
+        // FUNCTION TO MAKE CONTAINER SCROLLABLE WITH MOUSE
         (function (root, factory) {
                 if (typeof define === 'function' && define.amd) {
                     define(['exports'], factory);
@@ -142,9 +151,9 @@ export default {
 
                 exports.reset = reset;
             }));
+
             // Parallax effect using Tweenmax
             $("#js-parallax-container").mousemove(function(e) {
-                console.log("test");
                 parallaxIt(e, ".slide", -100);
                 parallaxIt(e, "img", -30);
             });
@@ -171,19 +180,59 @@ export default {
             
             $('#js-parallax-container').scrollLeft(centerX);
             $('#js-parallax-container').scrollTop(centerY);
-
-            // console.log('Component mounted.')
-			// axios.get('https://api.kanye.rest/').then(function(response) { 
-            // console.log(response);
-            // }, function() {
-            //     console.log('failed');
-            // });
-	},
-		data() {
-		return {
-		}
 	},
 	methods:{
+        // GET API TO GET QUOTES
+        getQuotes(){
+            if(this.quotes.length > 0){
+                this.quotes.splice(0,5);
+            }
+            let n=5;
+            for (let i = 0; i < n; i++) {
+                 axios
+            .get('https://api.kanye.rest/')
+            .then(response => {
+                this.moreQuotes.push(response.data.quote);
+                this.quotes = this.moreQuotes;
+                });
+            }
+  
+        },
+
+        // FUNCTION TO SAVE FAVOURITE QUOTE
+        AddToFavourite(quote){
+
+            axios
+            .post('/api/quotes',{"favourite_quotes":quote})
+            .then(response => {
+                this.favourites = response;
+                if(response.data.status == false){
+                    this.successAlertAlready =true;
+                    setTimeout(() => this.successAlertAlready = false, 2000);
+                }
+                if(response.data.status == true){
+                    this.successAlert =true;
+                    setTimeout(() => this.successAlert = false, 2000);
+                }
+                
+            })
+            .catch(error => console.log(error))
+        },
+
+        // GETTING STATE LOGOUT ACTION FUNCTION
+         ...mapActions({
+            signOut:"auth/logout"
+        }),
+
+        // FUCTION TO PERFORM LOGOUT FUNCTIONALITY
+        logout() {
+                axios.get('/logout')
+                .then(response => {
+                this.signOut()
+                 this.router.push({ path: '/' });
+                })
+                .catch(error => {});
+            }
 	}
 }
 </script>
@@ -326,4 +375,13 @@ export default {
         -moz-column-count: 1;
     }
     }
+
+.FavLink{
+    color:black;
+}
+
+.FavLink:hover{
+    color:black;
+    text-decoration: none;
+}
 </style>

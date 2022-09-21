@@ -58,15 +58,14 @@ class LoginController extends Controller
             'email' => 'required',
             'password' => 'required',
         ]);
-        // ['email' => "admin@admin.com", 'password' => "password"]
+       
         $credential=$request->only('email', 'password');
-        // dd($request->email);
         if(Auth::attempt($credential)){ 
             $user = Auth::user();
             $username = $user->name;
             return response()->json([
               'status'   => 'success',
-              'user' => $username,
+              'auth_user' => Auth::user()
             ]); 
           } else { 
             return response()->json([
@@ -77,19 +76,14 @@ class LoginController extends Controller
 
     }
 
-    /**
-     * Show the application logout.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function logout()
     {
         Auth::logout();
         \Session::flush();      
-        return redirect(route('usersLogin'));
+        return response()->json([
+          'status' => 'Logout'
+        ]); 
     }
-    public function home()
-    {
-    }
+  
 }
 ?>

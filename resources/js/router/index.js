@@ -3,35 +3,35 @@ import store from '@/store';
 
 const Home = () => import('@/components/Home.vue');
 const Login = () => import('@/components/login.vue');
+const Favourite = () => import('@/views/Favourite.vue');
+
 
 const routes = [
     {
         name: "login",
         path: "/",
-        component: Home,
+        component: Login,
         meta: {
             middleware: "guest",
             title: "Login"
         },
-        children: [
-            {
-                name: "Home",
-                path: '/home',
-                component: Home,
-                meta: {
-                    title: "Home"
-                }
-            }
-        ]
+    },
+    {
+        name: "Home",
+        path: '/home',
+        component: Home,
+        meta: {
+            title: "Home"
+        }
+    },
+    {
+        name: "Favourite",
+        path: "/favourite",
+        component: Favourite,
+        meta: {
+            title: "Favourite"
+        },
     }
-    // {
-    //     name: "Home",
-    //     path: "/",
-    //     component: Home,
-    //     meta: {
-    //         title: "Home"
-    //     },
-    // }
 ];
 const router = createRouter({
     history: createWebHistory(),

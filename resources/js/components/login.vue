@@ -1,4 +1,5 @@
 <template>
+<main>
     <div class="vue-tempalte">
         <form @submit="Login" id="createAdministrator">
              <div class="col-md-12 text-center" style="padding-top: 17px;">
@@ -28,28 +29,37 @@
         </form>
     </div>
         <router-view></router-view>
-
+</main>
 </template>
 
 <script>
-import router from '@/router';
-
-
+import { useRouter } from 'vue-router';
+import { mapActions } from 'vuex';
     export default {
          mounted() {
             console.log('Component mounted.')
         },
          data() {
             return {
+                router:useRouter(),
                 errors: [],
                 email: '',
-                password: ''
-              
+                password: '',  
             }
         },
+        computed:{
+     
+        },
         methods:{
+        // GETTING AUTH LOGIN FUNCTION
+        ...mapActions({
+            signIn:'auth/login'
+        }),
+
+        // FUNCTION TO PERFORM LOGIN FUNCTIONALITY
         Login: function (e) {
              e.preventDefault();
+             var self=this;
           this.errors = [];
           
           if (!this.email) {
@@ -58,26 +68,24 @@ import router from '@/router';
           if (!this.password) {
             this.errors.push('Password required.');
           }
-          console.log(this.errors);
-     
-           alert('hgfda');
            let formContents ={
             "email": this.email,
             "password": this.password
            };
-
-          axios.post('/login', formContents).then(function(response, status, request) {  
-            if(response.data.status =='success'){
-               router.push({ path: '/home' });
-            }else{
-                router.push({path:'/'});     
-            }
-                    }, function() {
-                        console.log('failed');
-                    });
-      
-       
-         
+          
+           if(this.errors.length == 0){
+                axios.get('/sanctum/csrf-cookie')
+                    axios.post('/login', formContents).  then(response => {
+                        self.signIn();
+                        if(response.data.status =='success'){
+                        this.router.push({ path: '/home' });
+                        }else{
+                            this.router.push({path:'/'});     
+                        } 
+                        })
+                        .catch(error => console.log(error))
+           }
+             
         }
       }
     }
